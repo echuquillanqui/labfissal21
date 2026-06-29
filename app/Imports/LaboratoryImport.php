@@ -77,7 +77,7 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
         foreach ($rows->take(10) as $index => $row) {
             $headers = $this->normalizeHeaders($row);
 
-            if (in_array('id', $headers, true) && (in_array('hto', $headers, true) || in_array('hb', $headers, true))) {
+            if (in_array('id', $headers, true)) {
                 return $index;
             }
         }
@@ -87,7 +87,7 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
 
     private function normalizeHeaders($row): array
     {
-        return collect($row)
+        return collect($this->normalizeRow($row))
             ->map(fn ($header) => $this->normalizeKey($header))
             ->all();
     }
@@ -95,6 +95,7 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
     private function rowToData(array $headers, $row): array
     {
         $data = [];
+        $row = $this->normalizeRow($row);
 
         foreach ($headers as $index => $header) {
             if ($header === '') {
@@ -105,6 +106,30 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
         }
 
         return $data;
+    }
+
+    private function normalizeRow($row): array
+    {
+        $values = collect($row)->values()->all();
+        $filledValues = array_values(array_filter($values, fn ($value) => $value !== null && $value !== ''));
+
+        if (count($filledValues) === 1 && is_string($filledValues[0])) {
+            $columns = str_getcsv($filledValues[0], ';');
+
+            if (count($columns) === 1) {
+                $columns = str_getcsv($filledValues[0], ',');
+            }
+
+            if (count($columns) === 1) {
+                $columns = str_getcsv($filledValues[0], chr(9));
+            }
+
+            if (count($columns) > 1) {
+                return $columns;
+            }
+        }
+
+        return $values;
     }
 
     private function normalizeKey($value): string
