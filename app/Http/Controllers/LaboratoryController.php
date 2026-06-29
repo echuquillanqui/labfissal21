@@ -80,22 +80,32 @@ class LaboratoryController extends Controller
 
     public function printBlock(Request $request)
     {
-        $date = $request->input('date_filter');
+        $validated = $request->validate([
+            'print_date' => ['nullable', 'date'],
+            'date_filter' => ['nullable', 'date'],
+        ]);
+
+        $date = $validated['print_date'] ?? $validated['date_filter'] ?? null;
         
         if (!$date) {
-            return back()->withErrors(['error' => 'Debe seleccionar una fecha para generar el reporte en bloque.']);
+            return back()->withErrors(['error' => 'Debe seleccionar una fecha para generar la impresión en bloque.']);
         }
+
+        $date = Carbon::parse($date)->toDateString();
 
         $reports = Laboratory::with('patient')
             ->whereDate('created_at', $date)
+            ->join('patients', 'laboratories.patient_id', '=', 'patients.id')
+            ->orderBy('patients.name')
+            ->select('laboratories.*')
             ->get();
 
         if ($reports->isEmpty()) {
-            return back()->withErrors(['error' => 'No hay exámenes registrados en la fecha seleccionada.']);
+            return back()->withErrors(['error' => 'No hay exámenes registrados en la fecha seleccionada para imprimir.']);
         }
 
         $pdf = Pdf::loadView('laboratories.pdf_block', compact('reports', 'date'))
-                  ->setPaper('a4', 'portrait');
+                  ->setPaper('a4', 'landscape');
 
         return $pdf->stream("Resultados_Laboratorio_{$date}.pdf");
     }

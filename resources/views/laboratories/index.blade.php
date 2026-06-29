@@ -30,30 +30,43 @@
 
     <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
         <div class="card-body p-3">
-            <form action="{{ route('laboratories.index') }}" method="GET" class="row g-3 align-items-center">
-                <div class="col-md-5">
+            <form action="{{ route('laboratories.index') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-lg-5 col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Buscar registro</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted">🔍</span>
                         <input type="text" name="search" class="form-control bg-light border-start-0" placeholder="Buscar por Paciente o DNI..." value="{{ $search }}">
-                        @if($search)
+                        @if($search || $date_filter)
                             <a href="{{ route('laboratories.index') }}" class="btn btn-light border-top border-bottom border-end text-danger">✕</a>
                         @endif
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Fecha para ver en tabla</label>
                     <input type="date" name="date_filter" class="form-control bg-light" value="{{ $date_filter }}">
                 </div>
-                <div class="col-md-2 d-grid">
+                <div class="col-lg-2 col-md-6 d-grid">
                     <button type="submit" class="btn btn-primary fw-medium">Filtrar Tabla</button>
                 </div>
-                <div class="col-md-2 d-grid">
-                    <a href="{{ route('laboratories.print_block', ['date_filter' => $date_filter]) }}" 
-                       class="btn btn-outline-danger fw-medium {{ !$date_filter ? 'disabled' : '' }}" 
-                       target="_blank">
-                        🖨️ Imprimir PDF
-                    </a>
-                </div>
+            
             </form>
+
+            <hr class="my-3">
+
+            <form action="{{ route('laboratories.print_block') }}" method="GET" target="_blank" class="row g-3 align-items-end">
+                <div class="col-lg-7 col-md-12">
+                    <div class="alert alert-danger-subtle border border-danger-subtle rounded-3 mb-0 py-2 small">
+                        <strong>Impresión en bloque:</strong> seleccione una fecha y se generará un PDF con <strong>todos</strong> los resultados registrados ese día, sin depender de la paginación ni de la búsqueda actual.
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Fecha a imprimir</label>
+                    <input type="date" name="print_date" class="form-control bg-light" value="{{ $date_filter }}" required>
+                </div>
+                <div class="col-lg-2 col-md-6 d-grid">
+                    <button type="submit" class="btn btn-outline-danger fw-medium">
+                        🖨️ Imprimir Todo
+                    </button>
         </div>
     </div>
 
