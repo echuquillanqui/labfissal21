@@ -63,8 +63,16 @@ class LaboratoryController extends Controller
         ]);
 
         try {
-            Excel::import(new LaboratoryImport, $request->file('excel_file'));
-            return back()->with('success', '¡Reporte FISSAL procesado y cruzado con éxito!');
+            $import = new LaboratoryImport;
+            Excel::import($import, $request->file('excel_file'));
+
+            $message = '¡Reporte FISSAL procesado! Registros importados: ' . $import->getImported();
+
+            if ($import->getSkipped() > 0) {
+                $message .= '. Filas omitidas por paciente no encontrado: ' . $import->getSkipped();
+            }
+
+            return back()->with('success', $message);
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Error al procesar el Excel: ' . $e->getMessage()]);
         }
