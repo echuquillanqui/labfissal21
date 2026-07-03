@@ -25,7 +25,7 @@ class LaboratoryController extends Controller
                 });
             })
             ->when($date_filter, function ($query, $date_filter) {
-                $query->whereDate('created_at', $date_filter);
+                $query->whereDate('laboratories.created_at', $date_filter);
             })
             ->latest()
             ->paginate(25)
@@ -94,7 +94,7 @@ class LaboratoryController extends Controller
         $date = Carbon::parse($date)->toDateString();
 
         $reports = Laboratory::with('patient')
-            ->whereDate('created_at', $date)
+            ->whereDate('laboratories.created_at', $date)
             ->join('patients', 'laboratories.patient_id', '=', 'patients.id')
             ->orderBy('patients.name')
             ->select('laboratories.*')
@@ -105,7 +105,7 @@ class LaboratoryController extends Controller
         }
 
         $pdf = Pdf::loadView('laboratories.pdf_block', compact('reports', 'date'))
-                  ->setPaper('a4', 'landscape');
+                  ->setPaper('a4', 'portrait');
 
         return $pdf->stream("Resultados_Laboratorio_{$date}.pdf");
     }

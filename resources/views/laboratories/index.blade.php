@@ -56,7 +56,7 @@
             <form action="{{ route('laboratories.print_block') }}" method="GET" target="_blank" class="row g-3 align-items-end">
                 <div class="col-lg-7 col-md-12">
                     <div class="alert alert-danger-subtle border border-danger-subtle rounded-3 mb-0 py-2 small">
-                        <strong>Impresión en bloque:</strong> seleccione una fecha y se generará un PDF con <strong>todos</strong> los resultados registrados ese día, sin depender de la paginación ni de la búsqueda actual.
+                        <strong>Impresión por paciente:</strong> seleccione una fecha y se generará un PDF con <strong>una hoja independiente por cada paciente</strong>, usando el formato de resultados de laboratorio.
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
@@ -65,8 +65,10 @@
                 </div>
                 <div class="col-lg-2 col-md-6 d-grid">
                     <button type="submit" class="btn btn-outline-danger fw-medium">
-                        🖨️ Imprimir Todo
+                        🖨️ Imprimir por Paciente
                     </button>
+                </div>
+            </form>
         </div>
     </div>
 
