@@ -16,25 +16,27 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
 
     private int $skipped = 0;
 
+    private ?Collection $patients = null;
+
     public function collection(Collection $rows): void
     {
         $headerIndex = $this->findHeaderIndex($rows);
 
         if ($headerIndex === null) {
-            throw new \RuntimeException('No se encontró la fila de cabeceras. Verifica que el archivo tenga una columna "id".');
+            throw new \RuntimeException('No se encontró la fila de cabeceras. Verifica que el archivo tenga la columna "nombres_y_apellidos".');
         }
 
         $headers = $this->normalizeHeaders($rows[$headerIndex]);
 
         foreach ($rows->slice($headerIndex + 1) as $row) {
             $data = $this->rowToData($headers, $row);
-            $patientId = $this->value($data, ['id', 'patient_id', 'paciente_id']);
+            $patientName = $this->value($data, ['nombres_y_apellidos', 'nombresapellidos', 'nombre_y_apellido', 'nombre_apellido', 'nombre', 'paciente']);
 
-            if ($patientId === null || $patientId === '') {
+            if ($patientName === null || $patientName === '') {
                 continue;
             }
 
-            $patient = Patient::find(trim((string) $patientId));
+            $patient = $this->findPatientByName((string) $patientName);
 
             if (! $patient) {
                 $this->skipped++;
@@ -46,7 +48,7 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
                 'hematocrito'  => $this->value($data, ['hto', 'hematocrito']),
                 'hemoglobina'  => $this->value($data, ['hb', 'hemoglobina']),
                 'urea_pre'     => $this->value($data, ['upre', 'ureapre', 'urea_pre']),
-                'urea_post'    => $this->value($data, ['upos', 'upost', 'ureapost', 'urea_post']),
+                'urea_post'    => $this->value($data, ['upost', 'upos', 'ureapost', 'urea_post']),
                 'cloro'        => $this->value($data, ['cloro']),
                 'sodio'        => $this->value($data, ['sodio']),
                 'potasio'      => $this->value($data, ['potasio']),
@@ -77,7 +79,7 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
         foreach ($rows->take(10) as $index => $row) {
             $headers = $this->normalizeHeaders($row);
 
-            if (in_array('id', $headers, true)) {
+            if (in_array('nombresyapellidos', $headers, true)) {
                 return $index;
             }
         }
@@ -130,6 +132,31 @@ class LaboratoryImport implements SkipsEmptyRows, ToCollection
         }
 
         return $values;
+    }
+
+    private function findPatientByName(string $patientName): ?Patient
+    {
+        $normalizedPatientName = $this->normalizePersonName($patientName);
+
+        if ($normalizedPatientName === '') {
+            return null;
+        }
+
+        $this->patients ??= Patient::all();
+
+        return $this->patients->first(function (Patient $patient) use ($normalizedPatientName) {
+            return $this->normalizePersonName($patient->name) === $normalizedPatientName;
+        });
+    }
+
+    private function normalizePersonName(string $value): string
+    {
+        return Str::of($value)
+            ->ascii()
+            ->lower()
+            ->replaceMatches('/[^a-z0-9]+/', ' ')
+            ->squish()
+            ->toString();
     }
 
     private function normalizeKey($value): string

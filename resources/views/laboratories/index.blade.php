@@ -207,7 +207,7 @@
                     @csrf
                     <div class="modal-body p-4">
                         <div class="alert alert-info rounded-3 small">
-                            El sistema procesará las filas emparejando automáticamente por nombres y asignando la fecha de hoy.
+                            El sistema procesará la cabecera nombres_y_apellidos, HTO, HB, UPRE, UPOST, CLORO, SODIO, POTASIO, fosforoserico, calcioserico, TGO y TGP; emparejará automáticamente por nombres y asignará la fecha de hoy.
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Archivo de Resultados (.xlsx, .xls, .csv)</label>

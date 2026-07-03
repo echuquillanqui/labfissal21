@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('laboratories', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('name')->constrained()->onDelete('cascade');
+            $table->string('name')->nullable();
 
             $table->string('hematocrito')->nullable()->comment('Unidad: %');
             $table->string('hemoglobina')->nullable()->comment('Unidad: g/dl');
